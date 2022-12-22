@@ -15,7 +15,12 @@ const EditUser = () => {
   useEffect(() => {
     api.professions.fetchAll().then((data) => setProfession(data));
     api.qualities.fetchAll().then((data) => setQualities(data));
-    api.users.getById(currentUserId.userId).then((data) => setData(data));
+    api.users.getById(currentUserId.userId).then((data) =>
+      setData(() => ({
+        ...data,
+        qualities: transformQalities(data.qualities),
+      }))
+    );
   }, []);
 
   const handleChange = (target) => {
@@ -36,8 +41,7 @@ const EditUser = () => {
   if (data) {
     us = transformQalities(data?.qualities);
   }
-  console.log(us);
-  console.log(data?.name);
+  console.log(data?.qualities);
 
   return (
     <div className="container mt-5">
@@ -77,7 +81,7 @@ const EditUser = () => {
           <MultiSelectField
             options={qualities}
             onChange={handleChange}
-            defaultValue={us}
+            defaultValue={data?.qualities}
             name="qualities"
             label="Выберите ваши качества"
           />
