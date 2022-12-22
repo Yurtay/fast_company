@@ -42,56 +42,63 @@ const EditUser = () => {
     us = transformQalities(data?.qualities);
   }
   console.log(data?.qualities);
-
-  return (
-    <div className="container mt-5">
-      <div className="row">
-        <div className="col-md-6 offset-md-3 shadow p-4">
-          <TextField
-            label="Имя"
-            name="name"
-            value={data?.name}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Электронная почта"
-            name="email"
-            value={data?.email}
-            onChange={handleChange}
-          />
-          <SelectField
-            label="Выбери свою профессию"
-            defaultOption="Choose..."
-            name="profession"
-            options={professions}
-            onChange={handleChange}
-            value={data?.profession?._id}
-          />
-          <RadioField
-            options={[
-              { name: "Male", value: "male" },
-              { name: "Female", value: "female" },
-              { name: "other", value: "other" },
-            ]}
-            value={data?.sex}
-            name="sex"
-            onChange={handleChange}
-            label="Выберите ваши пол"
-          />
-          <MultiSelectField
-            options={qualities}
-            onChange={handleChange}
-            defaultValue={data?.qualities}
-            name="qualities"
-            label="Выберите ваши качества"
-          />
-          <button className="btn btn-primary w-100 mx-auto" type="submit">
-            Обновить
-          </button>
+  if (data) {
+    return (
+      <div className="container mt-5">
+        <div className="row">
+          <div className="col-md-6 offset-md-3 shadow p-4">
+            <TextField
+              label="Имя"
+              name="name"
+              value={data?.name}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Электронная почта"
+              name="email"
+              value={data?.email}
+              onChange={handleChange}
+            />
+            <SelectField
+              label="Выбери свою профессию"
+              defaultOption="Choose..."
+              name="profession"
+              options={professions}
+              onChange={handleChange}
+              value={data?.profession?._id}
+            />
+            <RadioField
+              options={[
+                { name: "Male", value: "male" },
+                { name: "Female", value: "female" },
+                { name: "other", value: "other" },
+              ]}
+              value={data?.sex}
+              name="sex"
+              onChange={handleChange}
+              label="Выберите ваши пол"
+            />
+            <MultiSelectField
+              options={qualities}
+              onChange={handleChange}
+              defaultValue={data?.qualities}
+              name="qualities"
+              label="Выберите ваши качества"
+            />
+            <button
+              className="btn btn-primary w-100 mx-auto"
+              type="submit"
+              onClick={api.users.update(currentUserId.userId, data)}
+            >
+              Обновить
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return <h1>Loading...</h1>;
+  }
 };
 
 export default EditUser;
