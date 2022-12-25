@@ -11,6 +11,8 @@ const EditUser = () => {
   const [professions, setProfession] = useState({});
   const currentUserId = useParams();
   const [data, setData] = useState();
+  const [professionsOptions, setProfessionsOptions] = useState();
+  const [qualitiesOptions, setQualitiesOptions] = useState();
 
   useEffect(() => {
     api.professions.fetchAll().then((data) => setProfession(data));
@@ -18,30 +20,79 @@ const EditUser = () => {
     api.users.getById(currentUserId.userId).then((data) =>
       setData(() => ({
         ...data,
-        qualities: transformQalities(data.qualities),
+        qualities: transformQualities(data.qualities),
+        profession: data.profession._id,
       }))
     );
+    api.professions
+      .fetchAll()
+      .then((data) => setProfessionsOptions(transformProfessions(data)));
+    api.qualities
+      .fetchAll()
+      .then((data) => setQualitiesOptions(transformQualitiesOptions(data)));
   }, []);
+
+  console.log("qualities", qualities);
+  console.log("qualitiesOptions", qualitiesOptions);
 
   const handleChange = (target) => {
     setData((prevState) => ({
       ...prevState,
       [target.name]: target.value,
     }));
+    console.log(data);
   };
 
-  function transformQalities(qualities) {
+  function transformQualitiesOptions(qualities) {
+    return Object.keys(qualities).map((optionName) => ({
+      label: qualities[optionName].name,
+      value: qualities[optionName]._id,
+    }));
+  }
+
+  function transformProfessions(qualities) {
+    return Object.keys(qualities).map((optionName) => ({
+      name: qualities[optionName].name,
+      value: qualities[optionName]._id,
+    }));
+  }
+
+  function transformQualities(qualities) {
     return qualities.map((optionName) => ({
       label: optionName.name,
       value: optionName._id,
     }));
   }
-  let us;
 
-  if (data) {
-    us = transformQalities(data?.qualities);
+  function transformProfForData(id) {
+    let newDataProfession;
+    Object.keys(professions).map((prof) => {
+      if (professions[prof]._id === id) {
+        newDataProfession = professions[prof];
+      }
+    });
+    return newDataProfession;
   }
-  console.log(data?.qualities);
+
+  function transformQualForData() {
+    let newDataProfession;
+    Object.keys(professions).map((prof) => {
+      if (professions[prof]._id === data.profession) {
+        newDataProfession = professions[prof];
+      }
+    });
+    return newDataProfession;
+  }
+
+  const handleUpdateUser = () => {
+    api.users.update(currentUserId.userId, {
+      ...data,
+      profession: transformProfForData(data.profession),
+    });
+
+    // history.push(`/users/${currentUserId.userId}`);
+  };
+
   if (data) {
     return (
       <div className="container mt-5">
@@ -63,9 +114,9 @@ const EditUser = () => {
               label="Выбери свою профессию"
               defaultOption="Choose..."
               name="profession"
-              options={professions}
+              options={professionsOptions}
               onChange={handleChange}
-              value={data?.profession?._id}
+              value={data?.profession}
             />
             <RadioField
               options={[
@@ -79,7 +130,7 @@ const EditUser = () => {
               label="Выберите ваши пол"
             />
             <MultiSelectField
-              options={qualities}
+              options={qualitiesOptions}
               onChange={handleChange}
               defaultValue={data?.qualities}
               name="qualities"
@@ -88,7 +139,7 @@ const EditUser = () => {
             <button
               className="btn btn-primary w-100 mx-auto"
               type="submit"
-              onClick={api.users.update(currentUserId.userId, data)}
+              onClick={handleUpdateUser}
             >
               Обновить
             </button>
