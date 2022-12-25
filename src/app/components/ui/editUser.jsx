@@ -5,6 +5,7 @@ import RadioField from "../common/form/radioField";
 import MultiSelectField from "../common/form/multiSelectField";
 import api from "../../api";
 import { useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 const EditUser = () => {
   const [qualities, setQualities] = useState({});
@@ -13,6 +14,7 @@ const EditUser = () => {
   const [data, setData] = useState();
   const [professionsOptions, setProfessionsOptions] = useState();
   const [qualitiesOptions, setQualitiesOptions] = useState();
+  const history = useHistory();
 
   useEffect(() => {
     api.professions.fetchAll().then((data) => setProfession(data));
@@ -20,7 +22,7 @@ const EditUser = () => {
     api.users.getById(currentUserId.userId).then((data) =>
       setData(() => ({
         ...data,
-        qualities: transformQualities(data.qualities),
+        qualities: transformQualities(data?.qualities),
         profession: data.profession._id,
       }))
     );
@@ -31,9 +33,6 @@ const EditUser = () => {
       .fetchAll()
       .then((data) => setQualitiesOptions(transformQualitiesOptions(data)));
   }, []);
-
-  console.log("qualities", qualities);
-  console.log("qualitiesOptions", qualitiesOptions);
 
   const handleChange = (target) => {
     setData((prevState) => ({
@@ -75,23 +74,33 @@ const EditUser = () => {
   }
 
   function transformQualForData() {
-    let newDataProfession;
-    Object.keys(professions).map((prof) => {
-      if (professions[prof]._id === data.profession) {
-        newDataProfession = professions[prof];
-      }
+    let newDataQualities = [];
+    Object.keys(qualities).map((qual) => {
+      data.qualities.map((dataQual) => {
+        if (qualities[qual]._id === dataQual.value) {
+          newDataQualities.push(qualities[qual]);
+        }
+      });
     });
-    return newDataProfession;
+    return newDataQualities;
   }
 
-  const handleUpdateUser = () => {
+  // console.log("transformQualForData", transformQualForData());
+
+  function handleUpdateUser() {
     api.users.update(currentUserId.userId, {
       ...data,
       profession: transformProfForData(data.profession),
+      qualities: transformQualForData(),
     });
 
-    // history.push(`/users/${currentUserId.userId}`);
-  };
+    history.push(`/users/${currentUserId.userId}`);
+  }
+
+  // console.log("currentUserId", currentUserId);
+  // console.log("qualities", qualities);
+  // console.log("data.qualities", data?.qualities);
+  // console.log("qualitiesOptions", qualitiesOptions);
 
   if (data) {
     return (
